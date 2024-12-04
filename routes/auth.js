@@ -57,7 +57,7 @@ router.post("/signup", async (req, res) => {
     // Set OTP expiration time (10 minutes from now)
     const otpExpiration = new Date(Date.now() + otpExpirationTime);
 
-    // Create the user with the OTP and expiration time
+    // Create the user with OTP and expiration time
     const user = await User.create({
       firstName,
       lastName,
@@ -66,7 +66,7 @@ router.post("/signup", async (req, res) => {
       userType,
       otp, // Save the OTP temporarily for verification
       isVerified: false, // Set as not verified initially
-      otpExpiration, // Store the expiration time
+      otpExpiration, // Store the full expiration time with date and time
     });
 
     // Send OTP to the user's email
@@ -111,15 +111,18 @@ function sendOTP(email, otp) {
 // OTP Verification Route
 router.post("/verify", async (req, res) => {
   const { email, otp } = req.body;
+  
 
   try {
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
+    console.log("Current Time: ", new Date());
+    console.log("OTP Expiration Time: ", user.otpExpiration);
 
     // Check if OTP has expired
-    if (user.otpExpiration && new Date() > new Date(user.otpExpiration)) {
+    if (user.otpExpiration && new Date() < new Date(user.otpExpiration)) {
       return res.status(400).json({ message: "OTP has expired." });
     }
 

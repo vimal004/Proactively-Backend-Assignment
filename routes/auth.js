@@ -5,7 +5,7 @@ const router = express.Router();
 const nodemailer = require("nodemailer");
 const crypto = require("crypto"); // For generating OTP
 const jwt = require("jsonwebtoken");
-const otpExpirationTime = 10 * 60 * 1000;
+const otpExpirationTime = 5 * 60 * 1000;
 
 
 const emailValidator = (email) => {

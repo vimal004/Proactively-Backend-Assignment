@@ -1,7 +1,7 @@
 const express = require("express");
 const sequelize = require("./config/database");
 const User = require("./models/User");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const userrouter = require("./routes/auth");
 const protectedrouter = require("./routes/protected");
 

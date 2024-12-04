@@ -5,8 +5,7 @@ const router = express.Router();
 const nodemailer = require("nodemailer");
 const crypto = require("crypto"); // For generating OTP
 const jwt = require("jsonwebtoken");
-const otpExpirationTime = 5 * 60 * 1000;
-
+const otpExpirationTime = 10 * 60 * 1000;
 
 const emailValidator = (email) => {
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
@@ -171,6 +170,21 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Login failed. Please try again later." });
+  }
+});
+
+router.delete("/deleteuser", async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    await user.destroy();
+    res.status(200).json({ message: "User deleted successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to delete user." });
   }
 });
 

@@ -3,11 +3,13 @@ const sequelize = require("./config/database");
 const User = require("./models/User");
 const bcrypt = require("bcrypt");
 const userrouter = require("./routes/auth");
+const protectedrouter = require("./routes/protected");
 
 const app = express();
 
 app.use(express.json());
 app.use("/user", userrouter);
+app.use("/protected", protectedrouter);
 
 sequelize
   .sync({ force: false })

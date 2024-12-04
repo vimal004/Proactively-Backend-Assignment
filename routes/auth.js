@@ -5,10 +5,38 @@ const router = express.Router();
 const nodemailer = require("nodemailer");
 const crypto = require("crypto"); // For generating OTP
 const jwt = require("jsonwebtoken");
+const otpExpirationTime = 10 * 60 * 1000;
+
+
+const emailValidator = (email) => {
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+  return emailRegex.test(email);
+};
+
+const passwordValidator = (password) => {
+  // Password should be at least 8 characters, contain at least one uppercase letter,
+  // one lowercase letter, one digit, and one special character.
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}|\[\]\\:;,.<>?/~`]).{8,}$/;
+  return passwordRegex.test(password);
+};
 
 // Signup Route
 router.post("/signup", async (req, res) => {
   const { firstName, lastName, email, password, userType } = req.body;
+
+  // Validate email format
+  if (!emailValidator(email)) {
+    return res.status(400).json({ message: "Invalid email format." });
+  }
+
+  // Validate password strength
+  if (!passwordValidator(password)) {
+    return res.status(400).json({
+      message:
+        "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one digit, and one special character.",
+    });
+  }
 
   if (!["user", "speaker"].includes(userType)) {
     return res.status(400).json({ message: "Invalid user type." });
@@ -27,7 +55,10 @@ router.post("/signup", async (req, res) => {
     // Generate OTP
     const otp = crypto.randomInt(100000, 999999); // Generates a 6-digit OTP
 
-    // Create the user with the OTP
+    // Set OTP expiration time (10 minutes from now)
+    const otpExpiration = new Date(Date.now() + otpExpirationTime);
+
+    // Create the user with the OTP and expiration time
     const user = await User.create({
       firstName,
       lastName,
@@ -36,6 +67,7 @@ router.post("/signup", async (req, res) => {
       userType,
       otp, // Save the OTP temporarily for verification
       isVerified: false, // Set as not verified initially
+      otpExpiration, // Store the expiration time
     });
 
     // Send OTP to the user's email
@@ -85,6 +117,11 @@ router.post("/verify", async (req, res) => {
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(404).json({ message: "User not found." });
+    }
+
+    // Check if OTP has expired
+    if (user.otpExpiration && new Date() > new Date(user.otpExpiration)) {
+      return res.status(400).json({ message: "OTP has expired." });
     }
 
     // Verify OTP

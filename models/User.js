@@ -13,6 +13,8 @@ const User = sequelize.define("User", {
   password: { type: DataTypes.STRING, allowNull: false },
   userType: { type: DataTypes.ENUM("user", "speaker"), allowNull: false },
   isVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
+  otp: { type: DataTypes.STRING, allowNull: true }, // Store OTP temporarily
+  otpExpiration: { type: DataTypes.DATE, allowNull: true }, // Store OTP expiration time
 });
 
 module.exports = User;

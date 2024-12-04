@@ -123,9 +123,11 @@ router.post("/verify", async (req, res) => {
     console.log("OTP Expiration Time: ", user.otpExpiration);
 
     // Check if OTP has expired
-    if (user.otpExpiration && new Date() < new Date(user.otpExpiration)) {
+    if (user.otpExpiration && new Date() > new Date(user.otpExpiration)) {
       return res.status(400).json({ message: "OTP has expired." });
     }
+    console.log("OTP: ", user.otp); 
+    console.log("orginal OTP: ", otp);  
 
     // Verify OTP
     if (user.otp !== otp) {

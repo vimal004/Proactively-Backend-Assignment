@@ -52,7 +52,8 @@ router.post("/signup", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Generate OTP
-    const otp = crypto.randomInt(100000, 999999); // Generates a 6-digit OTP
+    let otp = crypto.randomInt(100000, 999999); // Generates a 6-digit OTP
+    otp = otp.toString(); // Convert OTP to a string
 
     // Set OTP expiration time (10 minutes from now)
     const otpExpiration = new Date(Date.now() + otpExpirationTime);

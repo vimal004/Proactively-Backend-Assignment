@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const router = express.Router();
 const nodemailer = require("nodemailer");
+const crypto = require("crypto"); // For generating OTP
+const jwt = require("jsonwebtoken");
 
 // Signup Route
 router.post("/signup", async (req, res) => {
@@ -22,14 +24,22 @@ router.post("/signup", async (req, res) => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create the user
+    // Generate OTP
+    const otp = crypto.randomInt(100000, 999999); // Generates a 6-digit OTP
+
+    // Create the user with the OTP
     const user = await User.create({
       firstName,
       lastName,
       email,
       password: hashedPassword,
       userType,
+      otp, // Save the OTP temporarily for verification
+      isVerified: false, // Set as not verified initially
     });
+
+    // Send OTP to the user's email
+    sendOTP(email, otp);
 
     res
       .status(201)
@@ -67,6 +77,7 @@ function sendOTP(email, otp) {
   });
 }
 
+// OTP Verification Route
 router.post("/verify", async (req, res) => {
   const { email, otp } = req.body;
 
@@ -91,6 +102,38 @@ router.post("/verify", async (req, res) => {
     res
       .status(500)
       .json({ message: "Verification failed. Please try again later." });
+  }
+});
+
+// Login Route
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { email } });
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(400).json({ message: "Invalid email or password." });
+    }
+
+    if (!user.isVerified) {
+      return res
+        .status(403)
+        .json({ message: "Please verify your email to activate the account." });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, userType: user.userType },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
+
+    res.status(200).json({ message: "Login successful.", token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Login failed. Please try again later." });
   }
 });
 

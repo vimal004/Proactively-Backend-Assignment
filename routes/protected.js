@@ -1,6 +1,7 @@
 const express = require("express");
 const protectedrouter = express.Router();
 const authorize = require("../middlewares/authMiddleware");
+const SpeakerProfile = require("../models/Speaker");
 
 // Sample route that requires 'user' role
 protectedrouter.get("/user-dashboard", authorize(["user"]), (req, res) => {
@@ -31,9 +32,44 @@ protectedrouter.get(
   }
 );
 
-protectedrouter.post("/createspeakerprofile", (req, res) => {
-  const { userid, email, password,  } = req.body; 
-  res.status(200).json({ message: "Speaker Profile Created!" });
-})
+protectedrouter.post(
+  "/createspeakerprofile",
+  authorize(["speaker"]), // Only speakers are allowed
+  async (req, res) => {
+    try {
+      const { expertise, pricePerSession } = req.body;
+
+      // Get the userId from req.user (set by the authorize middleware)
+      const userId = req.user.id;
+
+      // Check if the speaker profile already exists
+      const speakerProfileExists = await SpeakerProfile.findOne({
+        where: { userId },
+      });
+
+      if (speakerProfileExists) {
+        return res
+          .status(400)
+          .json({ message: "Speaker Profile already exists!" });
+      }
+
+      // Create the speaker profile
+      const speakerProfile = await SpeakerProfile.create({
+        userId,
+        expertise,
+        pricePerSession,
+      });
+
+      res.status(200).json({
+        message: "Speaker Profile Created!",
+        speakerProfile,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+);
+
 
 module.exports = protectedrouter;

@@ -71,5 +71,4 @@ protectedrouter.post(
   }
 );
 
-
 module.exports = protectedrouter;

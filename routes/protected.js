@@ -31,4 +31,9 @@ protectedrouter.get(
   }
 );
 
+protectedrouter.post("/createspeakerprofile", (req, res) => {
+  const { userid, email, password,  } = req.body; 
+  res.status(200).json({ message: "Speaker Profile Created!" });
+})
+
 module.exports = protectedrouter;

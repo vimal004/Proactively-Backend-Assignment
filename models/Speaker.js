@@ -11,6 +11,7 @@ const SpeakerProfile = sequelize.define("SpeakerProfile", {
   userId: {
     type: DataTypes.UUID,
     allowNull: false,
+    unique: true,
     references: {
       model: User, // Reference the User model
       key: "id", // Use the `id` field from the User model

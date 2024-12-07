@@ -12,8 +12,6 @@ app.use("/user", userrouter);
 app.use("/protected", protectedrouter);
 app.use("/public", publicrouter);
 
-const { User, SpeakerProfile } = require("./models/associations");
-
 // Sync database
 sequelize
   .sync({ alter: true })

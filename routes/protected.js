@@ -86,6 +86,15 @@ protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
       return res.status(404).json({ message: "Speaker not found!" });
     }
 
+    const bookingExists = await Booking.findOne({
+      where: { speakerId, date, timeSlot },
+    }); // Check if the slot is already booked
+
+    if (bookingExists) {
+      // If the slot is already booked
+      return res.status(400).json({ message: "Slot already booked!" });
+    }
+
     // Book the session
     const booking = await Booking.create({
       userId,

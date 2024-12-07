@@ -31,7 +31,7 @@ const Booking = sequelize.define("Booking", {
     onUpdate: "CASCADE",
   },
   date: {
-    type: DataTypes.DATEONLY,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   timeSlot: {

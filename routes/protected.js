@@ -2,6 +2,7 @@ const express = require("express");
 const protectedrouter = express.Router();
 const authorize = require("../middlewares/authMiddleware");
 const SpeakerProfile = require("../models/Speaker");
+const Booking = require("../models/Booking");
 
 // Sample route that requires 'user' role
 protectedrouter.get("/user-dashboard", authorize(["user"]), (req, res) => {
@@ -70,5 +71,34 @@ protectedrouter.post(
     }
   }
 );
+
+protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
+  try {
+    const { speakerId, date, timeSlot } = req.body;
+    const userId = req.user.id;
+
+    // Check if the speaker exists
+    const speakerProfile = await SpeakerProfile.findOne({
+      where: { userId: speakerId },
+    });
+
+    if (!speakerProfile) {
+      return res.status(404).json({ message: "Speaker not found!" });
+    }
+
+    // Book the session
+    const booking = await Booking.create({
+      userId,
+      speakerId,
+      date,
+      timeSlot,
+    });
+
+    res.status(200).json({ message: "Session Booked!", booking });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 module.exports = protectedrouter;

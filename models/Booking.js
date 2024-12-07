@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database");    
-const User = require("./User"); 
+const sequelize = require("../config/database");
+const User = require("./User");
 const SpeakerProfile = require("./Speaker");
 
 // Define the Booking model
@@ -31,11 +31,19 @@ const Booking = sequelize.define("Booking", {
     onUpdate: "CASCADE",
   },
   date: {
-    type: DataTypes.STRING,
+    type: DataTypes.DATEONLY,
     allowNull: false,
   },
   timeSlot: {
-    type: DataTypes.STRING,
+    type: DataTypes.ENUM(
+      "9:00 AM - 10:00 AM",
+      "10:00 AM - 11:00 AM",
+      "11:00 AM - 12:00 PM",
+      "12:00 PM - 1:00 PM",
+      "1:00 PM - 2:00 PM",
+      "2:00 PM - 3:00 PM",
+      "3:00 PM - 4:00 PM"
+    ),
     allowNull: false,
   },
 });

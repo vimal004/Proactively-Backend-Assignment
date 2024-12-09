@@ -141,10 +141,29 @@ protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
     await transporter.sendMail(mailOptionsForSpeaker);
 
    try {
+
+     const [start, end] = booking.timeSlot.split(" - ");
+
+     // Convert start time and end time to 24-hour format
+     const convertTo24Hour = (time) => {
+       const [timePart, period] = time.split(" ");
+       let [hours, minutes] = timePart.split(":").map(Number);
+
+       if (period === "PM" && hours !== 12) {
+         hours += 12;
+       } else if (period === "AM" && hours === 12) {
+         hours = 0;
+       }
+
+       return `${hours.toString().padStart(2, "0")}:${minutes
+         .toString()
+         .padStart(2, "0")}`;
+     };
+     
      const bookingDetails = {
        date: booking.date,
-       startTime: "09:00", // Extract from your time slot
-       endTime: "10:00", // Extract from your time slot
+       startTime: convertTo24Hour(start), // Extract from your time slot
+       endTime: convertTo24Hour(end), // Extract from your time slot
        userEmail: user.email,
        speakerEmail: speaker.email,
      };

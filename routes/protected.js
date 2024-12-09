@@ -3,10 +3,10 @@ const protectedrouter = express.Router();
 const authorize = require("../middlewares/authMiddleware");
 const SpeakerProfile = require("../models/Speaker");
 const Booking = require("../models/Booking");
-const User = require("../models/User"); 
+const User = require("../models/User");
 const nodemailer = require("nodemailer");
-const { google } = require("googleapis"); 
-const GoogleService = require("../utils/googleService");  
+const { google } = require("googleapis");
+const GoogleService = require("../utils/googleService");
 const googleService = new GoogleService();
 require("dotenv").config({ path: "../.env" });
 
@@ -79,6 +79,7 @@ protectedrouter.post(
 );
 
 protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
+  let calendarLink = ""; // Initialize calendar link
   try {
     const { speakerId, date, timeSlot } = req.body;
     const userId = req.user.id;
@@ -122,62 +123,63 @@ protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
       },
     });
 
+    try {
+      const [start, end] = booking.timeSlot.split(" - ");
+
+      // Convert start time and end time to 24-hour format
+      const convertTo24Hour = (time) => {
+        const [timePart, period] = time.split(" ");
+        let [hours, minutes] = timePart.split(":").map(Number);
+
+        if (period === "PM" && hours !== 12) {
+          hours += 12;
+        } else if (period === "AM" && hours === 12) {
+          hours = 0;
+        }
+
+        return `${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}`;
+      };
+
+      const bookingDetails = {
+        date: booking.date,
+        startTime: convertTo24Hour(start), // Extract from your time slot
+        endTime: convertTo24Hour(end), // Extract from your time slot
+        userEmail: user.email,
+        speakerEmail: speaker.email,
+      };
+
+      // Create calendar event
+      calendarLink = await googleService.createCalendarEvent(
+        bookingDetails
+      );
+
+      console.log("Calendar Link:", calendarLink);
+    } catch (error) {
+      console.error("Booking confirmation failed:", error);
+      // Handle error (e.g., show user-friendly message)
+    }
+
     const mailOptionsForUser = {
       from: process.env.EMAIL_USER,
       to: user.email,
       subject: "Booking Confirmation",
-      text: `Your session with ${speaker.firstName} ${speaker.lastName} on ${date} at ${timeSlot} has been successfully booked.`,
+      text: `Your session with ${speaker.firstName} ${speaker.lastName} on ${date} at ${timeSlot} has been successfully booked.
+      calendarLink: ${calendarLink}`,
     };
 
     const mailOptionsForSpeaker = {
       from: process.env.EMAIL_USER,
       to: speaker.email,
       subject: "New Booking Notification",
-      text: `You have a new booking from ${user.firstName} ${user.lastName} on ${date} at ${timeSlot}.`,
+      text: `You have a new booking from ${user.firstName} ${user.lastName} on ${date} at ${timeSlot}.
+      calendarLink: ${calendarLink}`,
     };
 
     // Send emails to both user and speaker
     await transporter.sendMail(mailOptionsForUser);
     await transporter.sendMail(mailOptionsForSpeaker);
-
-   try {
-
-     const [start, end] = booking.timeSlot.split(" - ");
-
-     // Convert start time and end time to 24-hour format
-     const convertTo24Hour = (time) => {
-       const [timePart, period] = time.split(" ");
-       let [hours, minutes] = timePart.split(":").map(Number);
-
-       if (period === "PM" && hours !== 12) {
-         hours += 12;
-       } else if (period === "AM" && hours === 12) {
-         hours = 0;
-       }
-
-       return `${hours.toString().padStart(2, "0")}:${minutes
-         .toString()
-         .padStart(2, "0")}`;
-     };
-     
-     const bookingDetails = {
-       date: booking.date,
-       startTime: convertTo24Hour(start), // Extract from your time slot
-       endTime: convertTo24Hour(end), // Extract from your time slot
-       userEmail: user.email,
-       speakerEmail: speaker.email,
-     };
-
-     // Create calendar event
-     const calendarLink = await googleService.createCalendarEvent(
-       bookingDetails
-     );
-
-     console.log("Calendar Link:", calendarLink);
-   } catch (error) {
-     console.error("Booking confirmation failed:", error);
-     // Handle error (e.g., show user-friendly message)
-   }
 
     res
       .status(200)

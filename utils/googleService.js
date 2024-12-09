@@ -69,10 +69,10 @@ class GoogleService {
 
       // Precise time handling
       const startDateTime = new Date(
-        `${bookingDetails.date}T${bookingDetails.startTime}:00Z`
+        `${bookingDetails.date}T${bookingDetails.startTime}:00+05:30`
       );
       const endDateTime = new Date(
-        `${bookingDetails.date}T${bookingDetails.endTime}:00Z`
+        `${bookingDetails.date}T${bookingDetails.endTime}:00+05:30`
       );
 
       const event = {
@@ -80,11 +80,11 @@ class GoogleService {
         description: `Booked Speaking Session`,
         start: {
           dateTime: startDateTime.toISOString(),
-          timeZone: "UTC",
+          timeZone: "Asia/Kolkata",
         },
         end: {
           dateTime: endDateTime.toISOString(),
-          timeZone: "UTC",
+          timeZone: "Asia/Kolkata",
         },
         attendees: [
           { email: bookingDetails.userEmail },

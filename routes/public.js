@@ -4,7 +4,6 @@ const SpeakerProfile = require("../models/Speaker");
 const User = require("../models/User");
 require("dotenv").config({ path: "../.env" });
 
-
 // Route to fetch all speakers
 publicRouter.get("/speakers", async (req, res) => {
   try {

@@ -151,9 +151,7 @@ protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
       };
 
       // Create calendar event
-      calendarLink = await googleService.createCalendarEvent(
-        bookingDetails
-      );
+      calendarLink = await googleService.createCalendarEvent(bookingDetails);
 
       console.log("Calendar Link:", calendarLink);
     } catch (error) {
@@ -165,16 +163,14 @@ protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
       from: process.env.EMAIL_USER,
       to: user.email,
       subject: "Booking Confirmation",
-      text: `Your session with ${speaker.firstName} ${speaker.lastName} on ${date} at ${timeSlot} has been successfully booked.
-      calendarLink: ${calendarLink}`,
+      text: `Your session with ${speaker.firstName} ${speaker.lastName} on ${date} at ${timeSlot} has been successfully booked. Calendar Link: ${calendarLink}`,
     };
 
     const mailOptionsForSpeaker = {
       from: process.env.EMAIL_USER,
       to: speaker.email,
       subject: "New Booking Notification",
-      text: `You have a new booking from ${user.firstName} ${user.lastName} on ${date} at ${timeSlot}.
-      calendarLink: ${calendarLink}`,
+      text: `You have a new booking from ${user.firstName} ${user.lastName} on ${date} at ${timeSlot}. Calendar Link: ${calendarLink}`,
     };
 
     // Send emails to both user and speaker
@@ -190,5 +186,4 @@ protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
   }
 });
 
-console.log("Client ID:", process.env.GOOGLE_CLIENT_ID);
 module.exports = protectedrouter;

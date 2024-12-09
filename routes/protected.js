@@ -5,6 +5,10 @@ const SpeakerProfile = require("../models/Speaker");
 const Booking = require("../models/Booking");
 const User = require("../models/User"); 
 const nodemailer = require("nodemailer");
+const { google } = require("googleapis"); 
+const GoogleService = require("../utils/googleService");  
+const googleService = new GoogleService();
+require("dotenv").config({ path: "../.env" });
 
 // Sample route that requires 'user' role
 protectedrouter.get("/user-dashboard", authorize(["user"]), (req, res) => {
@@ -136,6 +140,26 @@ protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
     await transporter.sendMail(mailOptionsForUser);
     await transporter.sendMail(mailOptionsForSpeaker);
 
+   try {
+     const bookingDetails = {
+       date: booking.date,
+       startTime: "09:00", // Extract from your time slot
+       endTime: "10:00", // Extract from your time slot
+       userEmail: user.email,
+       speakerEmail: speaker.email,
+     };
+
+     // Create calendar event
+     const calendarLink = await googleService.createCalendarEvent(
+       bookingDetails
+     );
+
+     console.log("Calendar Link:", calendarLink);
+   } catch (error) {
+     console.error("Booking confirmation failed:", error);
+     // Handle error (e.g., show user-friendly message)
+   }
+
     res
       .status(200)
       .json({ message: "Session Booked and Notifications Sent!", booking });
@@ -145,4 +169,5 @@ protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
   }
 });
 
+console.log("Client ID:", process.env.GOOGLE_CLIENT_ID);
 module.exports = protectedrouter;

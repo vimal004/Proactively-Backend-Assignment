@@ -10,6 +10,31 @@ const GoogleService = require("../utils/googleService");
 const googleService = new GoogleService();
 require("dotenv").config({ path: "../.env" });
 
+// Utility function to convert time to 24-hour format
+const convertTo24Hour = (time) => {
+  const [timePart, period] = time.split(" ");
+  let [hours, minutes] = timePart.split(":").map(Number);
+
+  if (period === "PM" && hours !== 12) {
+    hours += 12;
+  } else if (period === "AM" && hours === 12) {
+    hours = 0;
+  }
+
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}`;
+};
+
+// Email configuration
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
 // Sample route that requires 'user' role
 protectedrouter.get("/user-dashboard", authorize(["user"]), (req, res) => {
   res
@@ -39,17 +64,15 @@ protectedrouter.get(
   }
 );
 
+// Route to create speaker profile
 protectedrouter.post(
   "/createspeakerprofile",
-  authorize(["speaker"]), // Only speakers are allowed
+  authorize(["speaker"]),
   async (req, res) => {
     try {
       const { expertise, pricePerSession } = req.body;
-
-      // Get the userId from req.user (set by the authorize middleware)
       const userId = req.user.id;
 
-      // Check if the speaker profile already exists
       const speakerProfileExists = await SpeakerProfile.findOne({
         where: { userId },
       });
@@ -60,17 +83,15 @@ protectedrouter.post(
           .json({ message: "Speaker Profile already exists!" });
       }
 
-      // Create the speaker profile
       const speakerProfile = await SpeakerProfile.create({
         userId,
         expertise,
         pricePerSession,
       });
 
-      res.status(200).json({
-        message: "Speaker Profile Created!",
-        speakerProfile,
-      });
+      res
+        .status(200)
+        .json({ message: "Speaker Profile Created!", speakerProfile });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Internal Server Error" });
@@ -78,13 +99,13 @@ protectedrouter.post(
   }
 );
 
+// Route to book a session
 protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
-  let calendarLink = ""; // Initialize calendar link
+  let calendarLink = "";
   try {
     const { speakerId, date, timeSlot } = req.body;
     const userId = req.user.id;
 
-    // Check if the speaker exists
     const speakerProfile = await SpeakerProfile.findOne({
       where: { userId: speakerId },
     });
@@ -93,7 +114,6 @@ protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
       return res.status(404).json({ message: "Speaker not found!" });
     }
 
-    // Check if the slot is already booked
     const bookingExists = await Booking.findOne({
       where: { speakerId, date, timeSlot },
     });
@@ -102,61 +122,25 @@ protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
       return res.status(400).json({ message: "Slot already booked!" });
     }
 
-    // Create the booking
-    const booking = await Booking.create({
-      userId,
-      speakerId,
-      date,
-      timeSlot,
-    });
+    const booking = await Booking.create({ userId, speakerId, date, timeSlot });
 
-    // Fetch user and speaker details
     const user = await User.findByPk(userId);
     const speaker = await User.findByPk(speakerId);
 
-    // Email configuration
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
     try {
       const [start, end] = booking.timeSlot.split(" - ");
-
-      // Convert start time and end time to 24-hour format
-      const convertTo24Hour = (time) => {
-        const [timePart, period] = time.split(" ");
-        let [hours, minutes] = timePart.split(":").map(Number);
-
-        if (period === "PM" && hours !== 12) {
-          hours += 12;
-        } else if (period === "AM" && hours === 12) {
-          hours = 0;
-        }
-
-        return `${hours.toString().padStart(2, "0")}:${minutes
-          .toString()
-          .padStart(2, "0")}`;
-      };
-
       const bookingDetails = {
         date: booking.date,
-        startTime: convertTo24Hour(start), // Extract from your time slot
-        endTime: convertTo24Hour(end), // Extract from your time slot
+        startTime: convertTo24Hour(start),
+        endTime: convertTo24Hour(end),
         userEmail: user.email,
         speakerEmail: speaker.email,
       };
 
-      // Create calendar event
       calendarLink = await googleService.createCalendarEvent(bookingDetails);
-
       console.log("Calendar Link:", calendarLink);
     } catch (error) {
       console.error("Booking confirmation failed:", error);
-      // Handle error (e.g., show user-friendly message)
     }
 
     const mailOptionsForUser = {
@@ -173,7 +157,6 @@ protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
       text: `You have a new booking from ${user.firstName} ${user.lastName} on ${date} at ${timeSlot}. Calendar Link: ${calendarLink}`,
     };
 
-    // Send emails to both user and speaker
     await transporter.sendMail(mailOptionsForUser);
     await transporter.sendMail(mailOptionsForSpeaker);
 

@@ -88,7 +88,9 @@ router.post("/signup", async (req, res) => {
 
     sendOTP(email, otp);
 
-    res.status(201).json({ message: "Signup successful! Please verify your email.", user });
+    res
+      .status(201)
+      .json({ message: "Signup successful! Please verify your email.", user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Signup failed. Please try again later." });
@@ -119,7 +121,9 @@ router.post("/verify", async (req, res) => {
     res.status(200).json({ message: "Account verified successfully!" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Verification failed. Please try again later." });
+    res
+      .status(500)
+      .json({ message: "Verification failed. Please try again later." });
   }
 });
 
@@ -135,7 +139,9 @@ router.post("/login", async (req, res) => {
     }
 
     if (!user.isVerified) {
-      return res.status(403).json({ message: "Please verify your email to activate the account." });
+      return res
+        .status(403)
+        .json({ message: "Please verify your email to activate the account." });
     }
 
     const token = jwt.sign(

@@ -12,6 +12,10 @@ app.use("/user", userrouter);
 app.use("/protected", protectedrouter);
 app.use("/public", publicrouter);
 
+app.get("/", (req, res) => {
+  res.send("Welcome to the home page!");
+});
+
 // Sync database
 sequelize
   .sync({ alter: true })

@@ -4,36 +4,10 @@ const authorize = require("../middlewares/authMiddleware");
 const SpeakerProfile = require("../models/speaker");
 const Booking = require("../models/Booking");
 const User = require("../models/user");
-const nodemailer = require("nodemailer");
-const { google } = require("googleapis");
 const GoogleService = require("../utils/googleService");
+const transporter = require("../config/emailConfig");
+const convertTo24Hour = require("../utils/convertTo24Hour");
 const googleService = new GoogleService();
-require("dotenv").config({ path: "../.env" });
-
-// Utility function to convert time to 24-hour format
-const convertTo24Hour = (time) => {
-  const [timePart, period] = time.split(" ");
-  let [hours, minutes] = timePart.split(":").map(Number);
-
-  if (period === "PM" && hours !== 12) {
-    hours += 12;
-  } else if (period === "AM" && hours === 12) {
-    hours = 0;
-  }
-
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}`;
-};
-
-// Email configuration
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
 
 // Sample route that requires 'user' role
 protectedrouter.get("/user-dashboard", authorize(["user"]), (req, res) => {

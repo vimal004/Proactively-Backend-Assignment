@@ -2,49 +2,13 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const router = express.Router();
-const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-require("dotenv").config({ path: "../.env" });
+const sendOTP = require("../utils/sendOTP");
+const { emailValidator, passwordValidator } = require("../utils/validators");
 
 const otpExpirationTime = 10 * 60 * 1000;
 
-const emailValidator = (email) => {
-  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-  return emailRegex.test(email);
-};
-
-const passwordValidator = (password) => {
-  const passwordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}|\[\]\\:;,.<>?/~`]).{8,}$/;
-  return passwordRegex.test(password);
-};
-
-// Configure nodemailer
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-const sendOTP = (email, otp) => {
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: "Verify Your Account",
-    text: `Your OTP for account verification is: ${otp}`,
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error("Error sending email:", error);
-    } else {
-      console.log("Email sent:", info.response);
-    }
-  });
-};
 
 // Signup Route
 router.post("/signup", async (req, res) => {

@@ -5,6 +5,7 @@ const userrouter = require("./routes/auth");
 const protectedrouter = require("./routes/protected");
 const publicrouter = require("./routes/public");
 const { User, SpeakerProfile } = require("./models/associations");
+require("dotenv").config({ path: "../.env" });
 
 const app = express();
 

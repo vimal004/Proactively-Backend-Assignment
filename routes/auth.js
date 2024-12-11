@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
-const router = express.Router();
+const userRouter = express.Router();
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const sendOTP = require("../utils/sendOTP");
@@ -11,7 +11,7 @@ const otpExpirationTime = 10 * 60 * 1000;
 
 
 // Signup Route
-router.post("/signup", async (req, res) => {
+userRouter.post("/signup", async (req, res) => {
   const { firstName, lastName, email, password, userType } = req.body;
 
   if (!validateEmail(email)) {
@@ -62,7 +62,7 @@ router.post("/signup", async (req, res) => {
 });
 
 // OTP Verification Route
-router.post("/verify", async (req, res) => {
+userRouter.post("/verify", async (req, res) => {
   const { email, otp } = req.body;
 
   try {
@@ -92,7 +92,7 @@ router.post("/verify", async (req, res) => {
 });
 
 // Login Route
-router.post("/login", async (req, res) => {
+userRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -122,7 +122,7 @@ router.post("/login", async (req, res) => {
 });
 
 // Delete User Route
-router.delete("/deleteuser", async (req, res) => {
+userRouter.delete("/deleteuser", async (req, res) => {
   const { email } = req.body;
 
   try {
@@ -139,4 +139,4 @@ router.delete("/deleteuser", async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = userRouter;

@@ -9,7 +9,6 @@ const { validateEmail, validatePassword } = require("../utils/validators");
 
 const otpExpirationTime = 10 * 60 * 1000;
 
-
 // Signup Route
 userRouter.post("/signup", async (req, res) => {
   const { firstName, lastName, email, password, userType } = req.body;

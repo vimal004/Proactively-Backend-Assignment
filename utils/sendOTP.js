@@ -1,8 +1,8 @@
-const nodemailer = require('nodemailer');
-const Joi = require('joi');
+const nodemailer = require("nodemailer");
+const Joi = require("joi");
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,

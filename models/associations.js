@@ -1,5 +1,5 @@
-const SpeakerProfile = require("./Speaker");
-const User = require("./User");
+const SpeakerProfile = require("./speaker");
+const User = require("./user");
 
 // Define the associations
 User.hasOne(SpeakerProfile, { foreignKey: "userId" });

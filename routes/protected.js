@@ -1,9 +1,9 @@
 const express = require("express");
 const protectedrouter = express.Router();
 const authorize = require("../middlewares/authMiddleware");
-const SpeakerProfile = require("../models/Speaker");
+const SpeakerProfile = require("../models/speaker");
 const Booking = require("../models/Booking");
-const User = require("../models/User");
+const User = require("../models/user");
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 const GoogleService = require("../utils/googleService");

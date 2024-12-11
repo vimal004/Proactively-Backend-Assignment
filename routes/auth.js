@@ -5,7 +5,7 @@ const router = express.Router();
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const sendOTP = require("../utils/sendOTP");
-const { emailValidator, passwordValidator } = require("../utils/validators");
+const { validateEmail, validatePassword } = require("../utils/validators");
 
 const otpExpirationTime = 10 * 60 * 1000;
 
@@ -14,11 +14,11 @@ const otpExpirationTime = 10 * 60 * 1000;
 router.post("/signup", async (req, res) => {
   const { firstName, lastName, email, password, userType } = req.body;
 
-  if (!emailValidator(email)) {
+  if (!validateEmail(email)) {
     return res.status(400).json({ message: "Invalid email format." });
   }
 
-  if (!passwordValidator(password)) {
+  if (!validatePassword(password)) {
     return res.status(400).json({
       message:
         "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one digit, and one special character.",

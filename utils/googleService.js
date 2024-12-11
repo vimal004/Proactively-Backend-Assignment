@@ -17,8 +17,6 @@ class GoogleService {
     // Set credentials with refresh token
     this.oauth2Client.setCredentials({
       refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
-      access_token:
-        "ya29.a0AeDClZDTvRat6yk082Y1dqDgVZ7E_c6-Ok8mdqPwZoN-Zr1NN8h4t_AfZFJdzar_jTxAqv6qW1e0QjR7yfUbVV8TJewu6w1koFCgURupUMWToF8z_VVhulSySmDbh9voKoFumDLeFA83zkjExF4eJycG4Nshz87a5UI-wujNaCgYKAUASARMSFQHGX2MifUA5r6vMFwmHXCWdlnSGuA0175",
     });
   }
 

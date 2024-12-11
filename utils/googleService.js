@@ -20,7 +20,7 @@ class GoogleService {
     });
   }
 
-  // Add credential validation
+  // Validate required environment variables
   validateCredentials() {
     const requiredEnvVars = [
       "GOOGLE_CLIENT_ID",
@@ -36,6 +36,7 @@ class GoogleService {
     });
   }
 
+  // Refresh the access token
   async refreshAccessToken() {
     try {
       console.log("Attempting to refresh access token...");
@@ -53,6 +54,7 @@ class GoogleService {
     }
   }
 
+  // Create a calendar event
   async createCalendarEvent(bookingDetails) {
     try {
       // Explicitly refresh access token

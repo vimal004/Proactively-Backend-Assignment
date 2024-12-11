@@ -1,5 +1,5 @@
 const express = require("express");
-const protectedrouter = express.Router();
+const protectedRouter = express.Router();
 const authorize = require("../middlewares/authMiddleware");
 const SpeakerProfile = require("../models/speaker");
 const Booking = require("../models/Booking");
@@ -10,14 +10,14 @@ const convertTo24Hour = require("../utils/convertTo24Hour");
 const googleService = new GoogleService();
 
 // Sample route that requires 'user' role
-protectedrouter.get("/user-dashboard", authorize(["user"]), (req, res) => {
+protectedRouter.get("/user-dashboard", authorize(["user"]), (req, res) => {
   res
     .status(200)
     .json({ message: "Welcome to the User Dashboard", user: req.user });
 });
 
 // Sample route that requires 'speaker' role
-protectedrouter.get(
+protectedRouter.get(
   "/speaker-dashboard",
   authorize(["speaker"]),
   (req, res) => {
@@ -28,7 +28,7 @@ protectedrouter.get(
 );
 
 // Sample route that allows both 'user' and 'speaker' roles
-protectedrouter.get(
+protectedRouter.get(
   "/general-dashboard",
   authorize(["user", "speaker"]),
   (req, res) => {
@@ -39,7 +39,7 @@ protectedrouter.get(
 );
 
 // Route to create speaker profile
-protectedrouter.post(
+protectedRouter.post(
   "/createspeakerprofile",
   authorize(["speaker"]),
   async (req, res) => {
@@ -74,7 +74,7 @@ protectedrouter.post(
 );
 
 // Route to book a session
-protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
+protectedRouter.post("/book", authorize(["user"]), async (req, res) => {
   let calendarLink = "";
   try {
     const { speakerId, date, timeSlot } = req.body;
@@ -143,4 +143,4 @@ protectedrouter.post("/book", authorize(["user"]), async (req, res) => {
   }
 });
 
-module.exports = protectedrouter;
+module.exports = protectedRouter;

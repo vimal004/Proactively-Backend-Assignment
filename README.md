@@ -11,6 +11,4 @@ This API allows users to:
 - Receive email notifications and Google Calendar invites.  
 
 ### Authentication  
-- JWT tokens are required for protected routes.  
-
-### Note: The TypeScript version of the API is available in a separate branch.
+- JWT tokens are required for protected routes.

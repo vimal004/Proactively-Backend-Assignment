@@ -159,22 +159,25 @@ userRouter.post("/login", async (req: LoginRequest, res: Response) => {
 });
 
 // Delete User Route
-userRouter.delete("/deleteuser", async (req: DeleteUserRequest, res: Response) => {
-  const { email } = req.body;
+userRouter.delete(
+  "/deleteuser",
+  async (req: DeleteUserRequest, res: Response) => {
+    const { email } = req.body;
 
-  try {
-    const user = await User.findOne({ where: { email } });
-    if (!user) {
-      res.status(404).json({ message: "User not found." });
-      return;
+    try {
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+        res.status(404).json({ message: "User not found." });
+        return;
+      }
+
+      await user.destroy();
+      res.status(200).json({ message: "User deleted successfully." });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to delete user." });
     }
-
-    await user.destroy();
-    res.status(200).json({ message: "User deleted successfully." });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to delete user." });
   }
-});
+);
 
 export default userRouter;

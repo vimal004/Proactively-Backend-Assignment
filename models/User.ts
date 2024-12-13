@@ -13,9 +13,16 @@ interface UserAttributes {
   otpExpiration?: Date;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, "id" | "isVerified" | "otp" | "otpExpiration"> {}
+interface UserCreationAttributes
+  extends Optional<
+    UserAttributes,
+    "id" | "isVerified" | "otp" | "otpExpiration"
+  > {}
 
-class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
+class User
+  extends Model<UserAttributes, UserCreationAttributes>
+  implements UserAttributes
+{
   public id!: string;
   public firstName!: string;
   public lastName!: string;

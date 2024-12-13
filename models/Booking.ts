@@ -13,7 +13,10 @@ interface BookingAttributes {
 
 interface BookingCreationAttributes extends Optional<BookingAttributes, "id"> {}
 
-class Booking extends Model<BookingAttributes, BookingCreationAttributes> implements BookingAttributes {
+class Booking
+  extends Model<BookingAttributes, BookingCreationAttributes>
+  implements BookingAttributes
+{
   public id!: string;
   public userId!: string;
   public speakerId!: string;

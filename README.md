@@ -12,3 +12,5 @@ This API allows users to:
 
 ### Authentication  
 - JWT tokens are required for protected routes.  
+
+### Note: The TypeScript version of the API is available in a separate branch.

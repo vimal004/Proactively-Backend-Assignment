@@ -1,5 +1,4 @@
 import { google, calendar_v3 } from "googleapis";
-import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
 dotenv.config({ path: "../.env" });

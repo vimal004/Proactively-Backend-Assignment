@@ -1,8 +1,20 @@
-const { google } = require("googleapis");
-const nodemailer = require("nodemailer");
-require("dotenv").config({ path: "../.env" });
+import { google, calendar_v3 } from "googleapis";
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+
+dotenv.config({ path: "../.env" });
+
+interface BookingDetails {
+  date: string;
+  startTime: string;
+  endTime: string;
+  userEmail: string;
+  speakerEmail: string;
+}
 
 class GoogleService {
+  private oauth2Client: any;
+
   constructor() {
     // Validate environment variables
     this.validateCredentials();
@@ -21,7 +33,7 @@ class GoogleService {
   }
 
   // Validate required environment variables
-  validateCredentials() {
+  private validateCredentials(): void {
     const requiredEnvVars = [
       "GOOGLE_CLIENT_ID",
       "GOOGLE_CLIENT_SECRET",
@@ -37,13 +49,13 @@ class GoogleService {
   }
 
   // Refresh the access token
-  async refreshAccessToken() {
+  private async refreshAccessToken(): Promise<any> {
     try {
       console.log("Attempting to refresh access token...");
       const { credentials } = await this.oauth2Client.refreshAccessToken();
       console.log("Access token refreshed successfully");
       return credentials;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Access Token Refresh Error:", error);
       console.error("Detailed Error:", {
         message: error.message,
@@ -55,14 +67,14 @@ class GoogleService {
   }
 
   // Create a calendar event
-  async createCalendarEvent(bookingDetails) {
+  public async createCalendarEvent(bookingDetails: BookingDetails): Promise<string> {
     try {
       // Explicitly refresh access token
       const credentials = await this.refreshAccessToken();
       this.oauth2Client.setCredentials(credentials);
 
       // Create Google Calendar service
-      const calendar = google.calendar({
+      const calendar: calendar_v3.Calendar = google.calendar({
         version: "v3",
         auth: this.oauth2Client,
       });
@@ -75,7 +87,7 @@ class GoogleService {
         `${bookingDetails.date}T${bookingDetails.endTime}:00+05:30`
       );
 
-      const event = {
+      const event: calendar_v3.Schema$Event = {
         summary: `Speaking Session`,
         description: `Booked Speaking Session`,
         start: {
@@ -95,11 +107,11 @@ class GoogleService {
       // Insert event into calendar
       const response = await calendar.events.insert({
         calendarId: "primary",
-        resource: event,
+        requestBody: event,
       });
 
-      return response.data.htmlLink;
-    } catch (error) {
+      return response.data.htmlLink!;
+    } catch (error: any) {
       console.error("Comprehensive Google Calendar Error:", {
         message: error.message,
         stack: error.stack,
@@ -111,4 +123,4 @@ class GoogleService {
   }
 }
 
-module.exports = GoogleService;
+export default GoogleService;

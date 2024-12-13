@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import { Model } from "sequelize";
-import SpeakerProfile from "../models/Speaker";
-import User from "../models/User";
+import { SpeakerProfile, User } from "../models/associations";  
 
 const publicRouter = express.Router();
 

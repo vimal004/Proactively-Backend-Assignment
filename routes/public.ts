@@ -1,10 +1,12 @@
-const express = require("express");
+import express, { Request, Response } from "express";
+import { Model } from "sequelize";
+import SpeakerProfile from "../models/Speaker";
+import User from "../models/User";
+
 const publicRouter = express.Router();
-const SpeakerProfile = require("../models/Speaker");
-const User = require("../models/User");
 
 // Route to fetch all speakers
-publicRouter.get("/speakers", async (req, res) => {
+publicRouter.get("/speakers", async (req: Request, res: Response) => {
   try {
     const speakers = await SpeakerProfile.findAll({
       include: [
@@ -24,4 +26,4 @@ publicRouter.get("/speakers", async (req, res) => {
   }
 });
 
-module.exports = publicRouter;
+export default publicRouter;

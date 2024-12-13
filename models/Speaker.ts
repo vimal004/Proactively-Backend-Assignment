@@ -1,9 +1,17 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database");
-const User = require("./User"); // Import the User model
+import { Model, DataTypes } from "sequelize";
+import sequelize from "../config/database";
+import User from "./User"; // Import the User model
 
-const SpeakerProfile = sequelize.define(
-  "SpeakerProfile",
+class SpeakerProfile extends Model {
+  public id!: string;
+  public userId!: string;
+  public name!: string;
+  public bio!: string;
+  public expertise!: string;
+  public pricePerSession!: number;
+}
+
+SpeakerProfile.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -19,6 +27,14 @@ const SpeakerProfile = sequelize.define(
       },
       onDelete: "CASCADE",
     },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    bio: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
     expertise: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -29,6 +45,8 @@ const SpeakerProfile = sequelize.define(
     },
   },
   {
+    sequelize,
+    modelName: "SpeakerProfile",
     indexes: [
       {
         fields: ["userId"],
@@ -38,4 +56,4 @@ const SpeakerProfile = sequelize.define(
   }
 );
 
-module.exports = SpeakerProfile;
+export default SpeakerProfile;

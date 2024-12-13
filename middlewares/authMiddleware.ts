@@ -14,14 +14,13 @@ interface DecodedToken {
 
 // Middleware for role-based access control
 const authorize = (allowedRoles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     // Get the token from the Authorization header
     const token = req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
-      return res
-        .status(401)
-        .json({ message: "Access denied. No token provided." });
+      res.status(401).json({ message: "Access denied. No token provided." });
+      return;
     }
 
     try {
@@ -33,16 +32,17 @@ const authorize = (allowedRoles: string[]) => {
 
       // Check if the user's role is allowed
       if (!allowedRoles.includes(decoded.userType)) {
-        return res
+        res
           .status(403)
           .json({ message: "Access denied. Insufficient permissions." });
+        return;
       }
 
       // Attach user info to the request object for use in subsequent routes
       req.user = decoded;
       next(); // Proceed to the next middleware/route handler
     } catch (error) {
-      return res.status(400).json({ message: "Invalid token." });
+      res.status(400).json({ message: "Invalid token." });
     }
   };
 };

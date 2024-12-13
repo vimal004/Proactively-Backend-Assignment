@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import sequelize from "./config/database";
 import bcrypt from "bcryptjs";
 import userRouter from "./routes/auth";
-//import protectedRouter from "./routes/protected"; 
+import protectedRouter from "./routes/protected";
 import publicRouter from "./routes/public";
 import { User, SpeakerProfile } from "./models/associations";
 import dotenv from "dotenv";
@@ -13,7 +13,7 @@ const app = express();
 
 app.use(express.json());
 app.use("/user", userRouter);
-//app.use("/protected", protectedRouter);
+app.use("/protected", protectedRouter);
 app.use("/public", publicRouter);
 
 app.get("/", (req: Request, res: Response) => {

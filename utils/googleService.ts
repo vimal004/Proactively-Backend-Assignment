@@ -66,7 +66,9 @@ class GoogleService {
   }
 
   // Create a calendar event
-  public async createCalendarEvent(bookingDetails: BookingDetails): Promise<string> {
+  public async createCalendarEvent(
+    bookingDetails: BookingDetails
+  ): Promise<string> {
     try {
       // Explicitly refresh access token
       const credentials = await this.refreshAccessToken();

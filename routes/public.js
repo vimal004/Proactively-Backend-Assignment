@@ -1,7 +1,7 @@
 const express = require("express");
 const publicRouter = express.Router();
-const SpeakerProfile = require("../models/speaker");
-const User = require("../models/user");
+const SpeakerProfile = require("../models/Speaker");
+const User = require("../models/User");
 
 // Route to fetch all speakers
 publicRouter.get("/speakers", async (req, res) => {

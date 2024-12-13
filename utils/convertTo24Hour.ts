@@ -1,5 +1,5 @@
 // Utility function to convert time to 24-hour format
-const convertTo24Hour = (time) => {
+const convertTo24Hour = (time: string): string => {
   const [timePart, period] = time.split(" ");
   let [hours, minutes] = timePart.split(":").map(Number);
 
@@ -14,4 +14,4 @@ const convertTo24Hour = (time) => {
     .padStart(2, "0")}`;
 };
 
-module.exports = convertTo24Hour;
+export default convertTo24Hour;

@@ -1,37 +1,70 @@
-const express = require("express");
-const bcrypt = require("bcryptjs");
-const User = require("../models/User");
-const userRouter = express.Router();
-const crypto = require("crypto");
-const jwt = require("jsonwebtoken");
-const sendOTP = require("../utils/sendOTP");
-const { validateEmail, validatePassword } = require("../utils/validators");
+import express, { Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import User from "../models/User";
+import sendOTP from "../utils/sendOTP";
+import { validateEmail, validatePassword } from "../utils/validators";
 
+const userRouter = express.Router();
 const otpExpirationTime = 10 * 60 * 1000;
 
+interface SignupRequest extends Request {
+  body: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    userType: "user" | "speaker";
+  };
+}
+
+interface VerifyRequest extends Request {
+  body: {
+    email: string;
+    otp: string;
+  };
+}
+
+interface LoginRequest extends Request {
+  body: {
+    email: string;
+    password: string;
+  };
+}
+
+interface DeleteUserRequest extends Request {
+  body: {
+    email: string;
+  };
+}
+
 // Signup Route
-userRouter.post("/signup", async (req, res) => {
+userRouter.post("/signup", async (req: SignupRequest, res: Response) => {
   const { firstName, lastName, email, password, userType } = req.body;
 
   if (!validateEmail(email)) {
-    return res.status(400).json({ message: "Invalid email format." });
+    res.status(400).json({ message: "Invalid email format." });
+    return;
   }
 
   if (!validatePassword(password)) {
-    return res.status(400).json({
+    res.status(400).json({
       message:
         "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one digit, and one special character.",
     });
+    return;
   }
 
   if (!["user", "speaker"].includes(userType)) {
-    return res.status(400).json({ message: "Invalid user type." });
+    res.status(400).json({ message: "Invalid user type." });
+    return;
   }
 
   try {
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ message: "Email is already registered." });
+      res.status(400).json({ message: "Email is already registered." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -61,21 +94,24 @@ userRouter.post("/signup", async (req, res) => {
 });
 
 // OTP Verification Route
-userRouter.post("/verify", async (req, res) => {
+userRouter.post("/verify", async (req: VerifyRequest, res: Response) => {
   const { email, otp } = req.body;
 
   try {
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "User not found." });
+      return;
     }
 
     if (user.otpExpiration && new Date() > new Date(user.otpExpiration)) {
-      return res.status(400).json({ message: "OTP has expired." });
+      res.status(400).json({ message: "OTP has expired." });
+      return;
     }
 
     if (user.otp !== otp) {
-      return res.status(400).json({ message: "Invalid OTP." });
+      res.status(400).json({ message: "Invalid OTP." });
+      return;
     }
 
     user.isVerified = true;
@@ -91,25 +127,27 @@ userRouter.post("/verify", async (req, res) => {
 });
 
 // Login Route
-userRouter.post("/login", async (req, res) => {
+userRouter.post("/login", async (req: LoginRequest, res: Response) => {
   const { email, password } = req.body;
 
   try {
     const user = await User.findOne({ where: { email } });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(400).json({ message: "Invalid email or password." });
+      res.status(400).json({ message: "Invalid email or password." });
+      return;
     }
 
     if (!user.isVerified) {
-      return res
+      res
         .status(403)
         .json({ message: "Please verify your email to activate the account." });
+      return;
     }
 
     const token = jwt.sign(
       { id: user.id, userType: user.userType },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET as string,
       { expiresIn: "1h" }
     );
 
@@ -121,13 +159,14 @@ userRouter.post("/login", async (req, res) => {
 });
 
 // Delete User Route
-userRouter.delete("/deleteuser", async (req, res) => {
+userRouter.delete("/deleteuser", async (req: DeleteUserRequest, res: Response) => {
   const { email } = req.body;
 
   try {
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "User not found." });
+      return;
     }
 
     await user.destroy();
@@ -138,4 +177,4 @@ userRouter.delete("/deleteuser", async (req, res) => {
   }
 });
 
-module.exports = userRouter;
+export default userRouter;

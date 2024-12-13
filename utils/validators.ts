@@ -3,7 +3,7 @@
  * @param {string} email - The email address to validate.
  * @returns {boolean} - Returns true if the email is valid, otherwise false.
  */
-const validateEmail = (email) => {
+const validateEmail = (email: string): boolean => {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   return emailRegex.test(email);
 };
@@ -15,10 +15,10 @@ const validateEmail = (email) => {
  * @param {string} password - The password to validate.
  * @returns {boolean} - Returns true if the password is valid, otherwise false.
  */
-const validatePassword = (password) => {
+const validatePassword = (password: string): boolean => {
   const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}|\[\]\\:;,.<>?/~`]).{8,}$/;
   return passwordRegex.test(password);
 };
 
-module.exports = { validateEmail, validatePassword };
+export { validateEmail, validatePassword };

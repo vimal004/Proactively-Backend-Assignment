@@ -1,5 +1,5 @@
-const nodemailer = require("nodemailer");
-const Joi = require("joi");
+import nodemailer from "nodemailer";
+import Joi from "joi";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendOTP = async (email, otp) => {
+const sendOTP = async (email: string, otp: string): Promise<void> => {
   const schema = Joi.object({
     email: Joi.string().email().required(),
     otp: Joi.string().length(6).required(),
@@ -35,4 +35,4 @@ const sendOTP = async (email, otp) => {
   }
 };
 
-module.exports = sendOTP;
+export default sendOTP;
